@@ -9,9 +9,12 @@
 > **DAVIAN Robotics, KAIST AI**  
 > arXiv 2025. (\* indicates equal contribution)
 
+## 🎬 Teaser Video
 
-
-
+<video width="100%" controls>
+  <source src="assets/teaser.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ## Code Comming Soon
 
