@@ -1,6 +1,6 @@
 #!/bin/bash
 GPU_IDS=6
-SEED=846514
+SEED=42
 
 export CUDA_VISIBLE_DEVICES=$GPU_IDS
 

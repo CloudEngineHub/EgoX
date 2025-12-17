@@ -6,7 +6,7 @@
 
 > [Taewoong Kang\*](https://keh0t0.github.io/), [Kinam Kim\*](https://kinam0252.github.io/), [Dohyeon Kim\*](https://linkedin.com/in/dohyeon-kim-a79231347), [Minho Park](https://pmh9960.github.io/), [Junha Hyung](https://junhahyung.github.io/), and [Jaegul Choo](https://sites.google.com/site/jaegulchoo/)
 > 
-> **DAVIAN Robotics, KAIST AI**  
+> **DAVIAN Robotics, KAIST AI, SNU**  
 > arXiv 2025. (\* indicates equal contribution)
 
 ## 🎬 Teaser Video
@@ -91,7 +91,7 @@ To run inference with your own data, prepare the following file structure:
 ```
 your_dataset/              # Your custom dataset folder
 ├── caption.txt            # Text prompts (one per line)
-├── exo_gt_path.txt        # Exocentric video paths (one per line)
+├── exo_path.txt           # Exocentric video paths (one per line)
 ├── ego_prior_path.txt     # Egocentric prior video paths (one per line)
 ├── camera_params.json     # Camera parameters
 └── depth_maps/            # Depth maps directory
