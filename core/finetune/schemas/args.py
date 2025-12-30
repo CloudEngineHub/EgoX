@@ -21,12 +21,6 @@ class Args(BaseModel):
 
     ########## Data ###########
     data_root: Path
-    caption_column: Path
-    image_column: Path | None = None
-    # IC-LoRA specific columns
-    exo_video_column: Path | None = None
-    ego_gt_video_column: Path | None = None
-    ego_prior_video_column: Path | None = None
     meta_data_file: Path | None = None
     cos_sim_scaling_factor: float = 1.0
 
@@ -80,68 +74,8 @@ class Args(BaseModel):
     rank: int = 128
     lora_alpha: int = 64
     target_modules: List[str] = ["to_q", "to_k", "to_v", "to_out.0"]
-
-    ########## Validation ##########
-    do_validation: bool = False
-    validation_steps: int | None  # if set, should be a multiple of checkpointing_steps
-    validation_dir: Path | None  # if set do_validation, should not be None
-    validation_prompts: str | None  # if set do_validation, should not be None
-    # IC-LoRA specific validation columns
-    validation_exo_videos: str | None = None
-    validation_ego_prior_videos: str | None = None
     
     gen_fps: int = 15
-
-    #### deprecated args: gen_video_resolution
-    # 1. If set do_validation, should not be None
-    # 2. Suggest selecting the bucket from `video_resolution_buckets` that is closest to the resolution you have chosen for fine-tuning
-    #        or the resolution recommended by the model
-    # 3. Note:  For cogvideox, cogvideox1.5
-    #        The frame rate set in the bucket must be an integer multiple of 8 (spatial_compression_rate[4] * path_t[2] = 8)
-    #        The height and width set in the bucket must be an integer multiple of 8 (temporal_compression_rate[8])
-    # gen_video_resolution: Tuple[int, int, int] | None  # shape: (frames, height, width)
-
-    @field_validator("image_column")
-    def validate_image_column(cls, v: str | None, info: ValidationInfo) -> str | None:
-        values = info.data
-        if values.get("model_type") in ["i2v", "i2pm", "i2dpm"] and not v:
-            logging.warning(
-                "No `image_column` specified for i2v model. Will automatically extract first frames from videos as conditioning images."
-            )
-        return v
-
-    @field_validator("validation_dir", "validation_prompts")
-    def validate_validation_required_fields(cls, v: Any, info: ValidationInfo) -> Any:
-        values = info.data
-        if values.get("do_validation") and not v:
-            field_name = info.field_name
-            raise ValueError(f"{field_name} must be specified when do_validation is True")
-        return v
-
-    # ! deprecated
-    # @field_validator("validation_images")
-    # def validate_validation_images(cls, v: str | None, info: ValidationInfo) -> str | None:
-    #     values = info.data
-    #     if values.get("do_validation") and values.get("model_type") in ["i2v", "i2pm", "i2dpm"] and not v:
-    #         raise ValueError("validation_images must be specified when do_validation is True and model_type is i2v")
-    #     return v
-
-    # @field_validator("validation_videos")
-    # def validate_validation_videos(cls, v: str | None, info: ValidationInfo) -> str | None:
-    #     values = info.data
-    #     if values.get("do_validation") and values.get("model_type") == "v2v" and not v:
-    #         raise ValueError("validation_videos must be specified when do_validation is True and model_type is v2v")
-    #     return v
-
-    @field_validator("validation_steps")
-    def validate_validation_steps(cls, v: int | None, info: ValidationInfo) -> int | None:
-        values = info.data
-        if values.get("do_validation"):
-            if v is None:
-                raise ValueError("validation_steps must be specified when do_validation is True")
-            if values.get("checkpointing_steps") and v % values["checkpointing_steps"] != 0:
-                raise ValueError("validation_steps must be a multiple of checkpointing_steps")
-        return v
 
     @field_validator("train_resolution")
     def validate_train_resolution(cls, v: Tuple[int, int, int], info: ValidationInfo) -> str:
@@ -188,7 +122,7 @@ class Args(BaseModel):
         parser.add_argument("--training_type", type=str, required=True)
         parser.add_argument("--output_dir", type=str, required=True)
         parser.add_argument("--data_root", type=str, required=True)
-        parser.add_argument("--caption_column", type=str, required=True)
+        parser.add_argument("--caption_column", type=str, required=False)
         parser.add_argument("--video_column", type=str, required=False)
         parser.add_argument("--train_resolution", type=str, required=True)
         parser.add_argument("--report_to", type=str, required=True)

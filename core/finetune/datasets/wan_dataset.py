@@ -9,6 +9,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from typing_extensions import override
 import PIL
+import os
 
 from core.finetune.constants import LOG_LEVEL, LOG_NAME
 import numpy as np
@@ -58,11 +59,6 @@ class BaseWanDataset(Dataset):
     def __init__(
         self,
         data_root: str,
-        caption_column: str,
-        exo_video_column: str,
-        ego_gt_video_column: str,
-        ego_prior_video_column: str,
-        prompt: str,
         device: torch.device,
         meta_data_file: str = None,
         trainer: "Trainer" = None,
@@ -73,44 +69,31 @@ class BaseWanDataset(Dataset):
         super().__init__()
 
         data_root = Path(data_root)
-        if meta_data_file is not None:
-            import os
-            meta_data = load_from_json_file(meta_data_file)
-            with open(prompt, "r", encoding="utf-8") as file:
-                self.prompts = [line.strip() for line in file.readlines() if len(line.strip()) > 0]
-            self.exo_videos = []
-            self.ego_gt_videos = []
-            self.ego_prior_videos = []
-            self.depth_map_paths = []
-            self.depth_intrinsics = []
-            self.camera_extrinsics = []
-            self.camera_intrinsics = []
-            self.ego_extrinsics = []
-            self.ego_intrinsics = []
 
-            for ego_filename, meta in meta_data.items():
-                
-                self.exo_videos.append(Path(os.path.join(meta['exo_video_path']))) #! dohyeon data
-                self.ego_gt_videos.append(Path(os.path.join(meta['ego_video_path']))) #! Same but width wise concated
-                self.ego_prior_videos.append(Path(os.path.join(meta['ego_prior_path']))) #! None
-                
-                self.depth_map_paths.append(Path(os.path.join(data_root, 'depth_maps', meta['take_name'])))
-                self.depth_intrinsics.append(Path(os.path.join(meta['vipe_results_path'], 'intrinsics', meta['best_camera']+'.npz')))
-                self.camera_extrinsics.append(meta['camera_extrinsics'])
-                self.camera_intrinsics.append(meta['camera_intrinsics'])
-                self.ego_extrinsics.append(meta['ego_extrinsics'])
-                self.ego_intrinsics.append(meta['ego_intrinsics'])
-        else:
-            self.prompts = load_prompts(data_root / caption_column)
-            self.exo_videos = load_videos(data_root / exo_video_column)
-            self.ego_gt_videos = load_videos(data_root / ego_gt_video_column)
-            self.ego_prior_videos = load_videos(data_root / ego_prior_video_column)
-            self.depth_map_paths = None
-            self.depth_intrinsics = None
-            self.camera_extrinsics = None
-            self.camera_intrinsics = None
-            self.ego_extrinsics = None
-            self.ego_intrinsics = None
+        meta_data = load_from_json_file(meta_data_file)
+        self.exo_videos = []
+        self.ego_gt_videos = []
+        self.ego_prior_videos = []
+        self.depth_map_paths = []
+        self.depth_intrinsics = []
+        self.camera_extrinsics = []
+        self.camera_intrinsics = []
+        self.ego_extrinsics = []
+        self.ego_intrinsics = []
+
+        for ego_filename, meta in meta_data.items():
+            
+            self.exo_videos.append(Path(os.path.join(meta['exo_video_path']))) #! dohyeon data
+            self.ego_gt_videos.append(Path(os.path.join(meta['ego_video_path']))) #! Same but width wise concated
+            self.ego_prior_videos.append(Path(os.path.join(meta['ego_prior_path']))) #! None
+            self.prompts.append(meta['prompt'])
+            
+            self.depth_map_paths.append(Path(os.path.join(data_root, 'depth_maps', meta['take_name'])))
+            self.depth_intrinsics.append(Path(os.path.join(meta['vipe_results_path'], 'intrinsics', meta['best_camera']+'.npz')))
+            self.camera_extrinsics.append(meta['camera_extrinsics'])
+            self.camera_intrinsics.append(meta['camera_intrinsics'])
+            self.ego_extrinsics.append(meta['ego_extrinsics'])
+            self.ego_intrinsics.append(meta['ego_intrinsics'])
 
         self.max_frames = max_frames
         
@@ -471,7 +454,7 @@ class BaseWanDataset(Dataset):
 
 
         ##############
-        if attn_maps_paths.exists() and not self.is_t2v:
+        if attn_maps_paths.exists():
             loaded = load_file(attn_maps_paths)
             attn_maps = loaded["attn_maps"]
             attn_masks = loaded["attn_masks"]

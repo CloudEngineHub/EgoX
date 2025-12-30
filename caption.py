@@ -81,7 +81,6 @@ system_prompt = (
 
 
 def encode_image(image_path):
-    """지정된 경로의 이미지를 base64로 인코딩합니다."""
     try:
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
