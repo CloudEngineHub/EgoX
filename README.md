@@ -35,7 +35,7 @@ https://github.com/user-attachments/assets/5f599ad0-0922-414b-a8ab-e789da068efa
 
 ### System Requirements
 
-- **GPU**: < 80GB (for inference)
+- **GPU**: < 80GB (for inference) < 140GB (for train)
 - **CUDA**: 12.1 or higher
 - **Python**: 3.10
 - **PyTorch**: Compatible with CUDA 12.1
